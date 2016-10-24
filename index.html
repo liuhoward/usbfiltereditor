@@ -107,7 +107,7 @@
         },
         render: function() {
           var devices = [];
-          var that = this; // TODO: Needs to find out why that = this made it work; Was getting error that onCompanyDelete is not undefined
+          var that = this; // TODO: Needs to find out why that = this made it work; Was getting error that onDeviceDelete is not undefined
           this.props.clist.forEach(function(device) {
             devices.push(<Device device={device} onDeviceDelete={that.handleDeviceRemove} /> );
           });
