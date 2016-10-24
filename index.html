@@ -1,0 +1,187 @@
+<html>
+  <head>
+    <title>Hello ReactJS - Adding A Table Row - Code Example</title>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="http://fb.me/react-0.11.1.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.11.1.js"></script>
+    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>USB Filter editor</h1>
+      </div>
+      <div id="deviceApp"></div>  
+    </div>
+    <script type="text/jsx">
+      /** @jsx React.DOM */
+   
+      var Dropdown = React.createClass({
+    getInitialState: function() {
+        return {
+            listVisible: false
+        };
+    },
+
+    select: function(item) {
+        this.props.selected = item;
+    },
+
+    show: function() {
+        this.setState({ listVisible: true });
+        document.addEventListener("click", this.hide);
+    },
+
+    hide: function() {
+        this.setState({ listVisible: false });
+        document.removeEventListener("click", this.hide);
+    },
+
+    render: function() {
+        return <div className={"dropdown-container" + (this.state.listVisible ? " show" : "")}>
+            <div className={"dropdown-display" + (this.state.listVisible ? " clicked": "")} onClick={this.show}>
+                <span style={{ color: this.props.selected.hex }}>{this.props.selected.name}</span>
+                <i className="fa fa-angle-down"></i>
+            </div>
+            <div className="dropdown-list">
+                <div>
+                    {this.renderListItems()}
+                </div>
+            </div>
+        </div>;
+    },
+
+    renderListItems: function() {
+        var items = [];
+        for (var i = 0; i < this.props.list.length; i++) {
+            var item = this.props.list[i];
+            items.push(<div onClick={this.select.bind(null, item)}>
+                <span style={{ color: item.hex }}>{item.name}</span>
+            </div>);
+        }
+        return items;
+    }
+});
+      var DeviceApp = React.createClass({
+        getInitialState: function() {
+          return {devicelist:this.props.devices};
+        },
+        handleNewRowSubmit: function( newdevice ) {
+          this.setState( {devicelist: this.state.devicelist.concat([newdevice])} );
+        },
+        handleDeviceRemove: function( device ) {
+          
+          var index = -1;	
+          var clength = this.state.devicelist.length;
+      		for( var i = 0; i < clength; i++ ) {
+      			if( this.state.devicelist[i].cname === device.cname ) {
+      				index = i;
+      				break;
+      			}
+      		}
+      		this.state.devicelist.splice( index, 1 );	
+      		this.setState( {devicelist: this.state.devicelist} );
+        },
+        render: function() {
+          var tableStyle = {width: '100%'};
+          var leftTdStyle = {width: '50%',padding:'20px',verticalAlign: 'top'};
+          var rightTdStyle = {width: '50%',padding:'20px',verticalAlign: 'top'};
+          return ( 
+            <table style={tableStyle}>
+              <tr>
+                <td style={leftTdStyle}>
+                  <DeviceList clist={this.state.devicelist}  onDeviceRemove={this.handleDeviceRemove}/>
+                </td>
+                <td style={rightTdStyle}>
+                  <NewRow onRowSubmit={this.handleNewRowSubmit}/>
+                </td>
+              </tr>
+          </table>
+          );
+        }
+      });
+      
+      var DeviceList = React.createClass({
+        handleDeviceRemove: function(device){
+          this.props.onDeviceRemove( device );
+        },
+        render: function() {
+          var devices = [];
+          var that = this; // TODO: Needs to find out why that = this made it work; Was getting error that onCompanyDelete is not undefined
+          this.props.clist.forEach(function(device) {
+            devices.push(<Device device={device} onDeviceDelete={that.handleDeviceRemove} /> );
+          });
+          return ( 
+            <div>
+              <h3>List of devices</h3>
+              <table className="table table-striped">
+                <thead><tr><th>USB CLASS</th><th>Vendor</th><th>Product</th><th>Revision</th><th>Action</th></tr></thead>
+                <tbody>{devices}</tbody>
+              </table>
+            </div>
+            );
+        }
+      });
+      
+      var Device = React.createClass({
+        handleRemoveDevice: function() {
+          this.props.onDeviceDelete( this.props.device );
+          return false;
+        },
+        render: function() {
+          return (
+            <tr>
+              <td>{this.props.device.cname}</td>
+              <td>{this.props.device.ecount}</td>
+              <td>{this.props.device.hoffice}</td>
+              <td>{this.props.device.hoffice}</td>
+              <td><input type="button"  className="btn btn-primary" value="Remove" onClick={this.handleRemoveDevice}/></td>
+            </tr>
+            );
+        }
+      });
+      
+      var NewRow = React.createClass({
+        handleSubmit: function() {
+          var cname = this.refs.cname.getDOMNode().value;
+          var ecount = this.refs.ecount.getDOMNode().value;
+          var hoffice = this.refs.hoffice.getDOMNode().value;
+          var newrow = {cname: cname, ecount: ecount, hoffice: hoffice };
+          this.props.onRowSubmit( newrow );
+          
+          this.refs.cname.getDOMNode().value = '';
+          this.refs.ecount.getDOMNode().value = '';
+          this.refs.hoffice.getDOMNode().value = '';
+          return false;
+        },
+        render: function() {
+          var inputStyle = {padding:'12px'}
+          return ( 
+            <div className="well">
+              <h3>Add A device</h3>
+            <form onSubmit={this.handleSubmit}>
+              <div className="input-group input-group-lg" style={inputStyle}>
+                <input type="text"  className="form-control col-md-8"  placeholder="USB Class" ref="cname"/>
+              </div>
+              <div className="input-group input-group-lg" style={inputStyle}>
+                <input type="text"  className="form-control col-md-8" placeholder="Vendor id" ref="ecount"/>
+              </div>
+              <div className="input-group input-group-lg" style={inputStyle}>
+                <input type="text"  className="form-control col-md-8" placeholder="Product id" ref="hoffice"/>
+              </div>
+              <div className="input-group input-group-lg" style={inputStyle}>
+                <input type="text"  className="form-control col-md-8" placeholder="Revision" ref="hoffice"/>
+              </div>
+              <div className="input-group input-group-lg" style={inputStyle}>
+                <input type="submit"  className="btn btn-primary" value="Add Device"/>
+              </div>
+            </form>
+            </div>
+            );
+        }
+      });
+      var defDevices = [{cname:"Any",ecount:"empia technology",hoffice:"Silvercrestwebcam"},{cname:"Any",ecount:"Microsoft Corp",hoffice:"Lifecam-vx300"}];
+      React.renderComponent( <DeviceApp devices={defDevices}/>, document.getElementById( "deviceApp" ) );
+    </script>
+  </body>
+  </html>
