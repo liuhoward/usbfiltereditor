@@ -1,0 +1,19 @@
+Class	Name
+1	Audio
+2	Communication and CDC Control
+3	Human Interface Device (HID)
+5	Physical Interface Device (PID)
+6	Still Imaging
+7	Printer
+8	Mass Storage
+9	USB Hub
+10	CDC-Data
+11	Smart Card
+13	Content Security
+14	Video
+15	Personal Healthcare
+220	Diagnostic Device
+224	Wireless Controller
+239	Miscellaneous
+254	Application Specific
+255	Vendor Specific
