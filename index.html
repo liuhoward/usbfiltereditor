@@ -5,8 +5,10 @@
     <script src="http://fb.me/react-0.11.1.js"></script>
     <script src="http://fb.me/JSXTransformer-0.11.1.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js"></script>
+    <script src="script.js"></script>
   </head>
-  <body>
+  <body onload = "displayVendors();">
     <div class="container">
       <div class="page-header">
         <h1>USB Filter editor</h1>
@@ -14,61 +16,16 @@
       <div id="deviceApp"></div>  
     </div>
     <script type="text/jsx">
+     
       /** @jsx React.DOM */
-   
-      var Dropdown = React.createClass({
-    getInitialState: function() {
-        return {
-            listVisible: false
-        };
-    },
-
-    select: function(item) {
-        this.props.selected = item;
-    },
-
-    show: function() {
-        this.setState({ listVisible: true });
-        document.addEventListener("click", this.hide);
-    },
-
-    hide: function() {
-        this.setState({ listVisible: false });
-        document.removeEventListener("click", this.hide);
-    },
-
-    render: function() {
-        return <div className={"dropdown-container" + (this.state.listVisible ? " show" : "")}>
-            <div className={"dropdown-display" + (this.state.listVisible ? " clicked": "")} onClick={this.show}>
-                <span style={{ color: this.props.selected.hex }}>{this.props.selected.name}</span>
-                <i className="fa fa-angle-down"></i>
-            </div>
-            <div className="dropdown-list">
-                <div>
-                    {this.renderListItems()}
-                </div>
-            </div>
-        </div>;
-    },
-
-    renderListItems: function() {
-        var items = [];
-        for (var i = 0; i < this.props.list.length; i++) {
-            var item = this.props.list[i];
-            items.push(<div onClick={this.select.bind(null, item)}>
-                <span style={{ color: item.hex }}>{item.name}</span>
-            </div>);
-        }
-        return items;
-    }
-});
-      var DeviceApp = React.createClass({
+        var DeviceApp = React.createClass({
         getInitialState: function() {
           return {devicelist:this.props.devices};
         },
         handleNewRowSubmit: function( newdevice ) {
           this.setState( {devicelist: this.state.devicelist.concat([newdevice])} );
         },
+
         handleDeviceRemove: function( device ) {
           
           var index = -1;	
@@ -133,7 +90,7 @@
             <tr>
               <td>{this.props.device.cname}</td>
               <td>{this.props.device.ecount}</td>
-              <td>{this.props.device.hoffice}</td>
+              <td>{this.props.device.pcount}</td>
               <td>{this.props.device.hoffice}</td>
               <td><input type="button"  className="btn btn-primary" value="Remove" onClick={this.handleRemoveDevice}/></td>
             </tr>
@@ -142,36 +99,94 @@
       });
       
       var NewRow = React.createClass({
-        handleSubmit: function() {
+         getInitialState:function(){
+         return {selectValueUSB:'USB Class',selectValueVendor:'Vendor ID',selectValueProduct:'Product ID'};
+         },
+         handleChangeUSB:function(e){
+         
+         this.setState({selectValueUSB:e.target.value});
+         this.setState({targetValueUSB:e.target.value});
+                 
+         
+         },
+         handleChangeVendor:function(e){
+         
+         this.setState({selectValueVendor:e.target.value});
+         this.setState({targetValueVendor:e.target.value});      
+         displayVendors(e.target.value);
+         console.log(e.target.value);
+         
+         },
+         handleChangeProduct:function(e){
+         
+         this.setState({selectValueProduct:e.target.value});
+         this.setState({targetValueProduct:e.target.value});      
+         
+         },
+          handleSubmit: function() {
           var cname = this.refs.cname.getDOMNode().value;
           var ecount = this.refs.ecount.getDOMNode().value;
+          var pcount = this.refs.pcount.getDOMNode().value;
           var hoffice = this.refs.hoffice.getDOMNode().value;
-          var newrow = {cname: cname, ecount: ecount, hoffice: hoffice };
+          var newrow = {cname: cname, ecount: ecount,pcount:pcount, hoffice: hoffice };
           this.props.onRowSubmit( newrow );
           
           this.refs.cname.getDOMNode().value = '';
           this.refs.ecount.getDOMNode().value = '';
+          this.refs.pcount.getDOMNode().value = '';
           this.refs.hoffice.getDOMNode().value = '';
           return false;
         },
+        
         render: function() {
           var inputStyle = {padding:'12px'}
           return ( 
             <div className="well">
               <h3>Add A device</h3>
             <form onSubmit={this.handleSubmit}>
-              <div className="input-group input-group-lg" style={inputStyle}>
-                <input type="text"  className="form-control col-md-8"  placeholder="USB Class" ref="cname"/>
+
+              <div>
+              <select className="form-control col-md-8" value={this.state.selectValueUSB} ref="cname"
+               onChange={this.handleChangeUSB} 
+              >
+               <option value="USB Class">USB Class</option>
+               <option value="Application Specific(0xfe)">Application Specific(0xfe)</option>
+               <option value="Audio(0x01)">Audio(0x01)</option>
+               <option value="CDC-Data(0x0a)">CDC-Data(0x0a)</option>
+               <option value="Communication and CDC-Control(0x02)">Communication and CDC-Control(0x02)</option>
+               <option value="Content-Security(0x0d)">Content-Security(0x0d)</option>
+               <option value="Diagnostic Service(0xdc)">Diagnostic Service(0xdc)</option>
+               <option value="Human Interface Device(0x03)">Human Interface Device(0x03)</option>
+               <option value="Mass Storage(0x08)">Mass Storage(0x08)</option>
+               <option value="Miscellaneous(0xef)">Miscellaneous(0xef)</option>
+               <option value="Personal HealthCare(0x0f)">Personal HealthCare(0x0f)</option>
+               <option value="Physical Interface Device(0x05)">Physical Interface Device(0x05)</option>
+               <option value="Printer(0x07)">Printer(0x07)</option>
+               <option value="SmartCard(0x0b)">SmartCard(0x0b)</option>
+               <option value="Still Imaging(0x06)">Still Imaging(0x06)</option>
+               <option value="USB Hub(0x09)">USB Hub(0x09)</option>
+               <option value="Vendor Specific(0xff)">Vendor Specific(0xff)</option>
+               <option value="Video(0x0e)">Video(0x0e)</option>
+               <option value="Wireless Controller(0xe0)">Wireless Controller(0xe0)</option>
+               </select>
               </div>
-              <div className="input-group input-group-lg" style={inputStyle}>
-                <input type="text"  className="form-control col-md-8" placeholder="Vendor id" ref="ecount"/>
+              &nbsp;
+              <div>
+                <select id="selectVendor" className="form-control col-md-8" value={this.state.selectValueVendor} ref="ecount" onChange={this.handleChangeVendor}>
+                <option value="Vendor id">Vendor ID</option>
+                </select>
               </div>
-              <div className="input-group input-group-lg" style={inputStyle}>
-                <input type="text"  className="form-control col-md-8" placeholder="Product id" ref="hoffice"/>
+                &nbsp;                
+               <div>
+                <select id="selectProduct" className="form-control col-md-8" value={this.state.selectValueProduct} ref="pcount" onChange={this.handleChangeProduct}>
+                <option value="Product id">Product ID</option>
+                </select>
               </div>
+                   
               <div className="input-group input-group-lg" style={inputStyle}>
                 <input type="text"  className="form-control col-md-8" placeholder="Revision" ref="hoffice"/>
               </div>
+              
               <div className="input-group input-group-lg" style={inputStyle}>
                 <input type="submit"  className="btn btn-primary" value="Add Device"/>
               </div>
@@ -180,7 +195,9 @@
             );
         }
       });
-      var defDevices = [{cname:"Any",ecount:"empia technology",hoffice:"Silvercrestwebcam"},{cname:"Any",ecount:"Microsoft Corp",hoffice:"Lifecam-vx300"}];
+       
+      var defDevices = [{cname:"Any",ecount:"empia technology",pcount:"kelvinator",hoffice:"Silvercrestwebcam"},{cname:"Any",ecount:"Microsoft Corp",pcount:"electrolux",hoffice:"Lifecam-vx300"}];
+      
       React.renderComponent( <DeviceApp devices={defDevices}/>, document.getElementById( "deviceApp" ) );
     </script>
   </body>
