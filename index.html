@@ -8,22 +8,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js"></script>
     <script src="script.js"></script>
   </head>
-  <body onload = "displayVendors();">
+  <body onload = "displayVendors();;displayClassids();displayClassNames();displayVendorids();displayVendorNames();displayProductids();displayProductNames();">
     <div class="container">
       <div class="page-header">
         <h1>USB Filter editor</h1>
       </div>
       <div id="deviceApp"></div>  
     </div>
+    
     <script type="text/jsx">
      
       /** @jsx React.DOM */
+        
         var DeviceApp = React.createClass({
-        getInitialState: function() {
+          getInitialState: function() {
           return {devicelist:this.props.devices};
         },
         handleNewRowSubmit: function( newdevice ) {
           this.setState( {devicelist: this.state.devicelist.concat([newdevice])} );
+          
+        },
+
+        handleNewRowExport: function( newdevice ) {
+         
+          this.setState( {devicelistexport: this.state.devicelist.concat([newdevice])} );
         },
 
         handleDeviceRemove: function( device ) {
@@ -38,7 +46,73 @@
       		}
       		this.state.devicelist.splice( index, 1 );	
       		this.setState( {devicelist: this.state.devicelist} );
+          
         },
+
+        handleExportDevice: function() {
+                     
+            var CSV = ""; 
+            var ReportTitle ="USB Filter";
+            CSV += ReportTitle + '\r\n\n';
+            var row = "";
+            for (var index in this.state.devicelistexport[0]) {
+              
+              //Now convert each value to string and comma-seprated
+              if(index=='cname'){
+               index ="USB Class";
+              }
+              if(index=='ecount'){
+                index="Vendor";
+              }
+              if(index=='pcount'){
+                index="Product";
+              }
+              if(index=='hoffice'){
+                index="Revision";
+              }
+              if(index=='action'){
+                index="Action";
+              }
+              row += index + ',';
+              
+              console.log("column names are "+row);
+            }
+            row = row.slice(0, -1);
+            CSV += row + '\r\n';
+            //1st loop is to extract each row
+            for (var i = 0; i < this.state.devicelistexport.length; i++) {
+                var row = "";
+                
+                //2nd loop will extract each column and convert it in string comma-seprated
+                for (var index in this.state.devicelistexport[i]) {
+                    row += '"' + this.state.devicelistexport[i][index] + '",';
+                  }
+                
+                row.slice(0, row.length - 1);
+                
+                //add a line break after each row
+                CSV += row + '\r\n';
+            }
+
+            if (CSV == '') {        
+               alert("Invalid data");
+               return;
+            }
+
+           var fileName = "MyReport_"; 
+           fileName += ReportTitle.replace(/ /g,"_");
+           var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
+           var link = document.createElement("a");
+           link.href = uri;
+           link.style = "visibility:hidden";
+           link.download = fileName + ".txt";
+           document.body.appendChild(link);
+           link.click();
+           document.body.removeChild(link);
+
+        },
+
+       
         render: function() {
           var tableStyle = {width: '100%'};
           var leftTdStyle = {width: '50%',padding:'20px',verticalAlign: 'top'};
@@ -50,10 +124,16 @@
                   <DeviceList clist={this.state.devicelist}  onDeviceRemove={this.handleDeviceRemove}/>
                 </td>
                 <td style={rightTdStyle}>
-                  <NewRow onRowSubmit={this.handleNewRowSubmit}/>
+                  <NewRow onRowSubmit={this.handleNewRowSubmit} onRowExport={this.handleNewRowExport}/>
+                    
                 </td>
+                <td> 
+                <input type="button"  className="btn btn-primary" value="Export" onClick={this.handleExportDevice}/>
+              </td>
               </tr>
+              
           </table>
+         
           );
         }
       });
@@ -63,19 +143,24 @@
           this.props.onDeviceRemove( device );
         },
         render: function() {
+          
           var devices = [];
           var that = this; // TODO: Needs to find out why that = this made it work; Was getting error that onDeviceDelete is not undefined
           this.props.clist.forEach(function(device) {
             devices.push(<Device device={device} onDeviceDelete={that.handleDeviceRemove} /> );
           });
+          console.log("device is "+ {devices});
           return ( 
             <div>
               <h3>List of devices</h3>
               <table className="table table-striped">
-                <thead><tr><th>USB CLASS</th><th>Vendor</th><th>Product</th><th>Revision</th><th>Action</th></tr></thead>
+                <thead><tr><th>USB CLASS</th><th>Vendor</th><th>Product</th><th>Revision</th><th>Allow/Block</th><th>Action</th></tr></thead>
                 <tbody>{devices}</tbody>
               </table>
+              
             </div>
+
+            
             );
         }
       });
@@ -92,8 +177,12 @@
               <td>{this.props.device.ecount}</td>
               <td>{this.props.device.pcount}</td>
               <td>{this.props.device.hoffice}</td>
+              <td>{this.props.device.action}</td>
               <td><input type="button"  className="btn btn-primary" value="Remove" onClick={this.handleRemoveDevice}/></td>
+              
             </tr>
+           
+            
             );
         }
       });
@@ -101,42 +190,105 @@
       var NewRow = React.createClass({
          getInitialState:function(){
          return {selectValueUSB:'USB Class',selectValueVendor:'Vendor ID',selectValueProduct:'Product ID'};
+         var svendor;
+         var svedorid;
          },
          handleChangeUSB:function(e){
-         
-         this.setState({selectValueUSB:e.target.value});
-         this.setState({targetValueUSB:e.target.value});
-                 
-         
+            this.setState({selectValueUSB:e.target.value});
+            this.setState({targetValueUSB:e.target.value}); 
          },
-         handleChangeVendor:function(e){
-         
+
+         handleChangeVendor:function(e){         
          this.setState({selectValueVendor:e.target.value});
-         this.setState({targetValueVendor:e.target.value});      
-         displayVendors(e.target.value);
-         console.log(e.target.value);
-         
+         this.setState({targetValueVendor:e.target.value});
+         console.log("device list from handle change vendor "+ this.state.devicelist);  
+         svendor = displayVendors(e.target.value,this.state.devicelist);
+         svendorid = e.target.value;
+         console.log("selected vendor name"+svendor);    
+                                
          },
-         handleChangeProduct:function(e){
-         
+
+         handleChangeProduct:function(e){         
          this.setState({selectValueProduct:e.target.value});
-         this.setState({targetValueProduct:e.target.value});      
-         
+         this.setState({targetValueProduct:e.target.value});        
          },
-          handleSubmit: function() {
-          var cname = this.refs.cname.getDOMNode().value;
-          var ecount = this.refs.ecount.getDOMNode().value;
-          var pcount = this.refs.pcount.getDOMNode().value;
-          var hoffice = this.refs.hoffice.getDOMNode().value;
-          var newrow = {cname: cname, ecount: ecount,pcount:pcount, hoffice: hoffice };
-          this.props.onRowSubmit( newrow );
-          
-          this.refs.cname.getDOMNode().value = '';
-          this.refs.ecount.getDOMNode().value = '';
-          this.refs.pcount.getDOMNode().value = '';
-          this.refs.hoffice.getDOMNode().value = '';
-          return false;
+
+        handleChangeAction:function(e){
+          this.setState({selectAction:e.target.value});
+          this.setState({targetAction:e.target.value});
         },
+        
+        handleSubmit: function() {
+        var classids=[];
+        var classnames=[]; 
+        var productids=[];
+        var productnames=[];
+        var vendorids=[];
+        var vendornames=[];
+        var productid;
+        var usbclass;
+        var vendorid;
+        var actionid;
+
+        var cname = this.refs.cname.getDOMNode().value;  
+        classids= displayClassids();
+        classnames= displayClassNames();
+        console.log("classids are "+ classids);
+        console.log("class name is "+cname);
+
+        for( var i = 0; i < classnames.length; i++ ) {
+          if (cname == classnames[i]) {
+            usbclass = classids[i];
+            console.log("usbclass is "+usbclass);
+          }
+        }
+
+        var ecount = svendor;
+        vendorids = displayVendorids();
+        vendornames= displayVendorNames();
+        for( var i = 0; i < vendornames.length; i++ ) {
+          if (ecount== vendornames[i]) {
+            vendorid=vendorids[i];
+          }
+        }
+
+        var pcount = this.refs.pcount.getDOMNode().value;
+        productids= displayProductids();
+        productnames= displayProductNames();
+        for( var i = 0; i < productnames.length; i++ ) {
+          if (pcount== productnames[i]) {
+            productid=productids[i];
+          }
+        }
+
+        console.log("classids "+ usbclass);
+        console.log("productids "+productid);
+        console.log("vendorids "+vendorid);
+        console.log("classids "+classids);
+        
+
+        var hoffice = this.refs.hoffice.getDOMNode().value;
+        var action = this.refs.action.getDOMNode().value;
+        if(action == 'Allow'){
+          actionid = 1;
+        }
+        if(action == 'Block'){
+          actionid = -1;
+        }
+
+        console.log("actionid"+actionid);
+        
+        var newrow = {cname: cname, ecount: ecount,pcount:pcount, hoffice: hoffice, action:action };
+        var newrowcsv = {cname: usbclass, ecount: vendorid,pcount:productid, hoffice: hoffice, action:actionid };
+        this.props.onRowSubmit( newrow );
+        this.props.onRowExport(newrowcsv);        
+        this.refs.cname.getDOMNode().value = '';
+        this.refs.ecount.getDOMNode().value ='';
+        this.refs.pcount.getDOMNode().value = '';
+        this.refs.hoffice.getDOMNode().value = '';
+        this.refs.action.getDOMNode().value = '';
+        return false;
+      },
         
         render: function() {
           var inputStyle = {padding:'12px'}
@@ -145,29 +297,31 @@
               <h3>Add A device</h3>
             <form onSubmit={this.handleSubmit}>
 
+              
               <div>
+              
               <select className="form-control col-md-8" value={this.state.selectValueUSB} ref="cname"
                onChange={this.handleChangeUSB} 
               >
                <option value="USB Class">USB Class</option>
                <option value="Application Specific(0xfe)">Application Specific(0xfe)</option>
-               <option value="Audio(0x01)">Audio(0x01)</option>
-               <option value="CDC-Data(0x0a)">CDC-Data(0x0a)</option>
-               <option value="Communication and CDC-Control(0x02)">Communication and CDC-Control(0x02)</option>
-               <option value="Content-Security(0x0d)">Content-Security(0x0d)</option>
-               <option value="Diagnostic Service(0xdc)">Diagnostic Service(0xdc)</option>
-               <option value="Human Interface Device(0x03)">Human Interface Device(0x03)</option>
-               <option value="Mass Storage(0x08)">Mass Storage(0x08)</option>
-               <option value="Miscellaneous(0xef)">Miscellaneous(0xef)</option>
-               <option value="Personal HealthCare(0x0f)">Personal HealthCare(0x0f)</option>
-               <option value="Physical Interface Device(0x05)">Physical Interface Device(0x05)</option>
-               <option value="Printer(0x07)">Printer(0x07)</option>
-               <option value="SmartCard(0x0b)">SmartCard(0x0b)</option>
-               <option value="Still Imaging(0x06)">Still Imaging(0x06)</option>
-               <option value="USB Hub(0x09)">USB Hub(0x09)</option>
-               <option value="Vendor Specific(0xff)">Vendor Specific(0xff)</option>
-               <option value="Video(0x0e)">Video(0x0e)</option>
-               <option value="Wireless Controller(0xe0)">Wireless Controller(0xe0)</option>
+               <option value="Audio">Audio(0x01)</option>
+               <option value="CDC-Data">CDC-Data(0x0a)</option>
+               <option value="Communication and CDC-Control">Communication and CDC-Control(0x02)</option>
+               <option value="Content-Security">Content-Security(0x0d)</option>
+               <option value="Diagnostic Service">Diagnostic Service(0xdc)</option>
+               <option value="Human Interface Device">Human Interface Device(0x03)</option>
+               <option value="Mass Storage">Mass Storage(0x08)</option>
+               <option value="Miscellaneous">Miscellaneous(0xef)</option>
+               <option value="Personal HealthCare">Personal HealthCare(0x0f)</option>
+               <option value="Physical Interface Device">Physical Interface Device(0x05)</option>
+               <option value="Printer">Printer(0x07)</option>
+               <option value="SmartCard">SmartCard(0x0b)</option>
+               <option value="Still Imaging">Still Imaging(0x06)</option>
+               <option value="USB Hub">USB Hub(0x09)</option>
+               <option value="Vendor Specific">Vendor Specific(0xff)</option>
+               <option value="Video">Video(0x0e)</option>
+               <option value="Wireless Controller">Wireless Controller(0xe0)</option>
                </select>
               </div>
               &nbsp;
@@ -182,22 +336,33 @@
                 <option value="Product id">Product ID</option>
                 </select>
               </div>
-                   
+               &nbsp;
+              <div>
+                <select className="form-control col-md-8" value={this.state.selectAction} ref="action" onChange={this.handleChangeAction}
+                >
+                <option value="Action">Action</option>
+                <option value="Allow">Allow</option>
+                <option value="Block">Block</option>
+                </select>
+              </div>
               <div className="input-group input-group-lg" style={inputStyle}>
                 <input type="text"  className="form-control col-md-8" placeholder="Revision" ref="hoffice"/>
               </div>
-              
+              &nbsp;
+                           
               <div className="input-group input-group-lg" style={inputStyle}>
                 <input type="submit"  className="btn btn-primary" value="Add Device"/>
               </div>
+
+              
             </form>
             </div>
             );
         }
       });
        
-      var defDevices = [{cname:"Any",ecount:"empia technology",pcount:"kelvinator",hoffice:"Silvercrestwebcam"},{cname:"Any",ecount:"Microsoft Corp",pcount:"electrolux",hoffice:"Lifecam-vx300"}];
-      
+      var defDevices = [{cname:"Any",ecount:"empia technology",pcount:"kelvinator",hoffice:"Silvercrestwebcam",action:"Allow"},{cname:"Any",ecount:"Microsoft Corp",pcount:"electrolux",hoffice:"Lifecam-vx300",action:"Block"},{cname:"Any",ecount:"hp Corp",pcount:"canon",hoffice:"Lifecam-vx750",action:"Allow"}];
+      console.log("definition of devices is "+defDevices);
       React.renderComponent( <DeviceApp devices={defDevices}/>, document.getElementById( "deviceApp" ) );
     </script>
   </body>

@@ -6,6 +6,9 @@ var productids=[];
 var productnames=[];
 var pvendorids=[];
 var selectedvendor;
+var classids=[];
+var classnames=[];
+var usbclass;
 
 
 
@@ -17,6 +20,8 @@ d3.csv("vendors.csv",function(csv){
 
 console.log("vendorids's length",vendorids.length);
 displayVendors();
+displayVendorids();
+displayVendorNames();
 });
 
 d3.csv("products.csv",function(csv){
@@ -25,11 +30,39 @@ d3.csv("products.csv",function(csv){
                 productids.push(p.product);
                 productnames.push(p.name);
             })
- console.log("productnames outside method",productnames[0]);
  displayProducts();
+ displayProductids();
+ displayProductNames();
  });
 
+  d3.csv("classes.csv",function(csv){
+            csv.map(function(c){
+                classids.push(c.class);
+                classnames.push(c.name);
+            })
+       displayClassids();
+       displayClassNames();    
+           });
 
+function displayClassids(){
+            return classids;
+       }
+function displayClassNames(){
+    return classnames;
+}
+
+function displayVendorids(){
+    return vendorids;
+}
+function displayVendorNames(){
+    return vendornames;
+}
+function displayProductids(){
+    return productids;
+}
+function displayProductNames(){
+    return productnames;
+}
 function displayVendors(f) {
     // displayProducts();
      console.log("selectedvendor inside dvmethod",f);
@@ -41,24 +74,35 @@ function displayVendors(f) {
         var el = document.createElement("option");
         el.textContent = opt;
         el.value = vendorids[i];
-        selectedvendor =el.value
-        console.log("vendor id",selectedvendor);
+        // el.value = opt;
         select.appendChild(el);
     
           }
-       displayProducts(f)
+       displayProducts(f);
+       for(i=0;i<vendorids.length;i++){
+          if(f==vendorids[i]){
+             selectedvendor =vendornames[i];
+          }
+
+       }
+       console.log("vendor id",selectedvendor);
+       return selectedvendor;
      }
 
 function displayProducts(f) {
+    console.log("display products called..")
     console.log("selectedvendor inside dpmethod",f);
     var select = document.getElementById("selectProduct");
+    select.options.length=0;
+    availableproducts.length=0;
+    console.log("ap:"+availableproducts);
     for(i=0;i<pvendorids.length;i++){
         if(f==pvendorids[i]){
             availableproducts.push(productnames[i]);
         }
      }
-     console.log("availableproducts",availableproducts);
-     for(var i = 0; i < availableproducts.length; i++) {
+    console.log("availableproducts",availableproducts);
+    for(var i = 0; i < availableproducts.length; i++) {
     var opt = availableproducts[i];
     // console.log("opt",opt);
     var el = document.createElement("option");
@@ -68,7 +112,7 @@ function displayProducts(f) {
     
     }
 
- 
+  return pvendorids;
   
 }
 
