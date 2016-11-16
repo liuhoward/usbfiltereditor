@@ -97,12 +97,9 @@ function displayProducts(f) {
     availableproducts.length=0;
     console.log("ap:"+availableproducts);
     for(i=0;i<pvendorids.length;i++){
-
-      // TODO this is just a dirty fix to make something show up in the UI
-
-        // if(f==pvendorids[i]){
+        if(f==pvendorids[i]){
             availableproducts.push(productnames[i]);
-        // }
+        }
      }
     console.log("availableproducts",availableproducts);
     for(var i = 0; i < availableproducts.length; i++) {
