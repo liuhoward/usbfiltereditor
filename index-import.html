@@ -63,6 +63,7 @@
             var files = e.target.files;
             var file = e.target.files[0];
             var reader = new FileReader();
+            that = this;
             reader.onload = function() {  
               text = reader.result; 
               impdevices = text.split("|",5);
@@ -113,19 +114,19 @@
                     
                     console.log("to be imported row:"+improw);
                     
-                    this.setState( {devicelistimport: improw} );
-                    var importstate = this.state.devicelistimport ?  
-                    this.state.devicelistimport.concat([improw]) : [improw];                 
-                    this.setState( {devicelist: this.state.devicelistimport} );
+                    that.setState( {devicelistimport: improw} );
+                    var importstate = that.state.devicelistimport ?  
+                    that.state.devicelistimport.concat([improw]) : [improw];                 
+                    that.setState( {devicelist: that.state.devicelistimport} );
                  
                 }
               
              
-            }.bind(this);
+            };
             reader.readAsText(file);
 
                        
-        }.bind(this),
+        },
 
         
 
