@@ -1,0 +1,94 @@
+Download the React DevTools for a better development experience: http://fb.me/react-devtools
+You are using the in-browser JSX transformer. Be sure to precompile your JSX for production - http://facebook.github.io/react/docs/tooling-integration.html#jsx
+definition of devices is [object Object]
+device is [object Object]
+Each child in an array should have a unique "key" prop. Check the render method of DeviceList. See http://fb.me/react-warning-keys for more information.
+selectedvendor inside dvmethod undefined
+display products called..
+selectedvendor inside dpmethod undefined
+ap:
+availableproducts Array[0]
+vendor id undefined
+vendorids's length 2731
+selectedvendor inside dvmethod undefined
+display products called..
+selectedvendor inside dpmethod undefined
+ap:
+availableproducts Array[0]
+vendor id undefined
+display products called..
+selectedvendor inside dpmethod undefined
+ap:
+availableproducts Array[0]
+device list from handle change vendor undefined
+selectedvendor inside dvmethod 768
+display products called..
+selectedvendor inside dpmethod 768
+ap:
+availableproducts []
+vendor id MM300 eBook Reader
+selected vendor nameMM300 eBook Reader
+device list from handle change vendor undefined
+selectedvendor inside dvmethod 1
+display products called..
+selectedvendor inside dpmethod 1
+ap:
+availableproducts ["Arbiter Systems"]
+vendor id Fry's Electronics
+selected vendor nameFry's Electronics
+classids are 1,2,3,5,6,7,8,9,10,11,13,14,15,220,224,239,254,255,-1
+class name is Printer
+usbclass is 7
+classids 7
+productids 5163
+vendorids 1
+classids 1,2,3,5,6,7,8,9,10,11,13,14,15,220,224,239,254,255,-1
+actionid1
+device is [object Object]
+device list from handle change vendor undefined
+selectedvendor inside dvmethod 39418
+display products called..
+selectedvendor inside dpmethod 39418
+ap:
+availableproducts ["V.cap Camera Device"]
+vendor id Grandtec
+selected vendor nameGrandtec
+classids are 1,2,3,5,6,7,8,9,10,11,13,14,15,220,224,239,254,255,-1
+class name is Human Interface Device
+classids undefined
+productids 35208
+vendorids 39418
+classids 1,2,3,5,6,7,8,9,10,11,13,14,15,220,224,239,254,255,-1
+actionid-1
+device is [object Object]
+device list from handle change vendor undefined
+selectedvendor inside dvmethod 33006
+display products called..
+selectedvendor inside dpmethod 33006
+ap:
+availableproducts ["USB Tablet"]
+vendor id VirtualBox
+selected vendor nameVirtualBox
+classids are 1,2,3,5,6,7,8,9,10,11,13,14,15,220,224,239,254,255,-1
+class name is Printer
+usbclass is 7
+classids 7
+productids 33
+vendorids 33006
+classids 1,2,3,5,6,7,8,9,10,11,13,14,15,220,224,239,254,255,-1
+actionid1
+device is [object Object]
+handle import device called
+File contents: -1,60186,10000,256,1|-1,1118,245,-1,1|-1,1133,2245,-1,1|-1,1133,2242,5,1|8,-1,-1,-1,1|7,-1,-1,-1,1|-1,-1,-1,-1,0|8,-1,-1,-1,0
+
+usbclass is Any
+vname is eMPIA Technology
+pname is SilverCrest Webcam
+class name:Any
+vendor name:eMPIA Technology
+product name:SilverCrest Webcam
+revision:256
+to be imported row:[object Object]
+Uncaught TypeError: this.setState is not a function(…)
+handle import device called
+Uncaught TypeError: Cannot read property '0' of null(…)
