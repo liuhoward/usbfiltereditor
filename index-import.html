@@ -63,7 +63,7 @@
             var files = e.target.files;
             var file = e.target.files[0];
             var reader = new FileReader();
-            that = this;
+            var that=this;
             reader.onload = function() {  
               text = reader.result; 
               impdevices = text.split("|",5);
@@ -466,3 +466,4 @@
     </script>
   </body>
   </html>
+
