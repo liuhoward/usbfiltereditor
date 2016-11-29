@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js"></script>
     <script src="script.js"></script>
   </head>
-  <body onload = "displayVendors();;displayClassids();displayClassNames();displayVendorids();displayVendorNames();displayProductids();displayProductNames();">
+  <body onload = "displayVendors();displayClassids();displayPvendorids();displayClassNames();displayVendorids();displayVendorNames();displayProductids();displayProductNames();">
     <div class="container">
       <div class="page-header">
         <h1>USB Filter editor</h1>
@@ -28,9 +28,9 @@
           this.setState( {devicelist: this.state.devicelist.concat([newdevice])} );
 
         },
-
+       
         handleNewRowExport: function( newdevice ) {
-          var newState = this.state.devicelistexport ?
+          var newState = this.state.devicelistexport ?  
             this.state.devicelistexport.concat([newdevice]) : [newdevice];
           this.setState( {devicelistexport: newState} );
         },
@@ -54,10 +54,85 @@
 
         },
 
+        
+        handleImportDevice: function(e) { 
+            console.log("handle import device called");
+            var text;
+            var impdevices = [];
+            var devprops = [];
+            var files = e.target.files;
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            var that=this;
+            reader.onload = function() {  
+              text = reader.result; 
+              impdevices = text.split("|",5);
+              console.log("File contents: " + text);
+              for (var i = 0; i < impdevices.length; i++) {
+                  devprops = impdevices[i].split(",",5);
+                  var cid = devprops[0];
+                  var vid = devprops[1];
+                  var pid = devprops[2];
+                  var revision = devprops[3];
+                  var action = devprops[4];
+                                         
+                  for( var j = 0; j < classids.length; j++ ) {
+                      if (cid == classids[j]) {
+                        var ucname = classnames[j];
+                        console.log("usbclass is "+ucname);
+                      }
+                    }
+                  
+                  for( var k = 0; k < vendorids.length; k++ ) {
+                      if (vid == vendorids[k]) {
+                        var vname = vendornames[k];
+                        console.log("vname is "+vname);
+                      }
+                  }
+                    
+                   
+                   for( var l = 0; l < productids.length; l++ ) {
+                      if (pid == productids[l] && vid == pvendorids[l]) {
+                        var pname = productnames[l];
+                        console.log("pname is "+pname);
+                      }
+                    }
+
+                    if(action == "1"){
+                      var aname= "Allow";
+                    }   
+                    if(action == "0"){
+                      var aname = "Block";
+                    }
+
+                    console.log("class name:"+ucname);
+                    console.log("vendor name:"+vname);
+                    console.log("product name:"+pname);
+                    console.log("revision:"+revision);
+                   
+                    var improw = {cname: ucname, ecount: vname,pcount:pname, hoffice: revision, action:action };
+                    
+                    console.log("to be imported row:"+improw);
+
+                     that.setState( {devicelist: that.state.devicelist.concat([improw])} );
+                    
+                   
+                 
+                }
+              
+             
+            };
+            reader.readAsText(file);
+
+                       
+        },
+
+        
+
         handleExportDevice: function() {
 
             var CSV = "";
-            var ReportTitle ="USB Filter";
+            var ReportTitle ="";
             CSV += ReportTitle + '\r\n\n';
             var row = "";
             for (var index in this.state.devicelistexport[0]) {
@@ -78,7 +153,7 @@
               if(index=='action'){
                 index="Action";
               }
-              row += index + ',';
+              
 
               console.log("column names are "+row);
             }
@@ -90,13 +165,13 @@
 
                 //2nd loop will extract each column and convert it in string comma-seprated
                 for (var index in this.state.devicelistexport[i]) {
-                    row += '"' + this.state.devicelistexport[i][index] + '",';
+                    row +=  this.state.devicelistexport[i][index] + ',';
                   }
 
                 row.slice(0, row.length - 1);
 
                 //add a line break after each row
-                CSV += row + '\r\n';
+                CSV += row + '|';
             }
 
             if (CSV == '') {
@@ -104,7 +179,7 @@
                return;
             }
 
-           var fileName = "MyReport_";
+           var fileName = "usbfilter";
            fileName += ReportTitle.replace(/ /g,"_");
            var uri = 'data:text/csv;charset=utf-8,' + escape(CSV);
            var link = document.createElement("a");
@@ -129,12 +204,23 @@
                   <DeviceList clist={this.state.devicelist}  onDeviceRemove={this.handleDeviceRemove}/>
                 </td>
                 <td style={rightTdStyle}>
-                  <NewRow onRowSubmit={this.handleNewRowSubmit} onRowExport={this.handleNewRowExport}/>
+                  <NewRow onRowSubmit={this.handleNewRowSubmit} onRowExport={this.handleNewRowExport} />
 
                 </td>
                 <td>
                 <input type="button"  className="btn btn-primary" value="Export" onClick={this.handleExportDevice}/>
-              </td>
+                </td>
+
+                <td>
+                <input type="button"  className="btn btn-primary" value="Import" onClick={this.handleImportDevice}/>
+                </td>
+
+                <td>
+                <input type="file"  id ="openselect" name="files[]" className="btn btn-primary" onChange={this.handleImportDevice}/>
+                <output id="list"></output>
+                </td>
+                
+                
               </tr>
 
           </table>
@@ -228,6 +314,7 @@
         var classnames=[];
         var productids=[];
         var productnames=[];
+        var pvendorids=[];
         var vendorids=[];
         var vendornames=[];
         var productid;
@@ -260,6 +347,8 @@
         var pcount = this.refs.pcount.getDOMNode().value;
         productids= displayProductids();
         productnames= displayProductNames();
+        pvendorids= displayPvendorids();
+        
         for( var i = 0; i < productnames.length; i++ ) {
           if (pcount== productnames[i]) {
             productid=productids[i];
@@ -285,8 +374,10 @@
 
         var newrow = {cname: cname, ecount: ecount,pcount:pcount, hoffice: hoffice, action:action };
         var newrowcsv = {cname: usbclass, ecount: vendorid,pcount:productid, hoffice: hoffice, action:actionid };
+       
         this.props.onRowSubmit( newrow );
         this.props.onRowExport(newrowcsv);
+                
         this.refs.cname.getDOMNode().value = '';
         this.refs.ecount.getDOMNode().value ='';
         this.refs.pcount.getDOMNode().value = '';
@@ -359,6 +450,8 @@
                 <input type="submit"  className="btn btn-primary" value="Add Device"/>
               </div>
 
+              
+
 
             </form>
             </div>
@@ -366,7 +459,7 @@
         }
       });
 
-      var defDevices = [{cname:"Any",ecount:"empia technology",pcount:"kelvinator",hoffice:"Silvercrestwebcam",action:"Allow"},{cname:"Any",ecount:"Microsoft Corp",pcount:"electrolux",hoffice:"Lifecam-vx300",action:"Block"},{cname:"Any",ecount:"hp Corp",pcount:"canon",hoffice:"Lifecam-vx750",action:"Allow"}];
+      var defDevices = [{}];
       console.log("definition of devices is "+defDevices);
       React.renderComponent( <DeviceApp devices={defDevices}/>, document.getElementById( "deviceApp" ) );
     </script>
