@@ -1,0 +1,38 @@
+<html>
+<script>
+var api = parent.pluginApi('UsbFilter');
+        api.register({
+            UiInit: function() {api.addMainTabActionButton('VirtualMachine', 'USB Filter Editor', {
+    onClick: function() {
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', api.engineBaseUrl() + 'services/files/usbfilter.txt', true);
+        xhr.withCredentials = true;
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('Filter', 'false');
+        xhr.setRequestHeader('Authorization', 'Bearer ' + api.ssoToken());
+        xhr.send();
+	//var responsetext = "";
+        xhr.onreadystatechange = function() { 
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                        //responsetext = JSON.parse(xhr.responseText);
+                        //window.alert(xhr.responseText);
+			api.showDialog('USB Filter', 'usb-filter-dialog', 'plugin/UsbFilter/usbfilter.html#filter='+xhr.responseText+'&token='+api.ssoToken()+'!baseurl='+api.engineBaseUrl(), '1100px', '1100px' );
+                }
+        };
+       //window.alert('api.showDialog(USB Filter', 'usb-filter-dialog', 'plugin/UsbFilter/usbfilter.html#filter='+responsetext+'&token='+api.ssoToken()', 1100px', '1100px' )');
+
+
+    },
+    isEnabled: function() {
+        return data.length == 1;
+    }
+});}
+        });
+        api.ready();
+</script>
+
+<body>
+</body>
+</html>

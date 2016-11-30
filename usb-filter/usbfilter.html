@@ -1,11 +1,11 @@
 <html>
   <head>
-    <title>Hello ReactJS - Adding A Table Row - Code Example</title>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <script src="http://fb.me/react-0.11.1.js"></script>
-    <script src="http://fb.me/JSXTransformer-0.11.1.js"></script>
-    <script src="http://code.jquery.com/jquery-1.10.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.14/d3.js"></script>
+    <title>USB Filter Editor</title>
+    <link rel="stylesheet" href="lib/bootstrap.min.css">
+    <script src="lib/react-0.11.1.js"></script>
+    <script src="lib/JSXTransformer-0.11.1.js"></script>
+    <script src="lib/jquery-1.10.0.min.js"></script>
+    <script src="lib/d3.js"></script>
     <script src="script.js"></script>
   </head>
   <body onload = "displayVendors();displayClassids();displayPvendorids();displayClassNames();displayVendorids();displayVendorNames();displayProductids();displayProductNames();">
@@ -463,5 +463,26 @@
       console.log("definition of devices is "+defDevices);
       React.renderComponent( <DeviceApp devices={defDevices}/>, document.getElementById( "deviceApp" ) );
     </script>
+	<script type="text/jsx">
+		var filter = document.URL.substring(document.URL.indexOf('#')+8,document.URL.indexOf('&'));
+		var token = document.URL.substring(document.URL.indexOf('&')+7,document.URL.indexOf('!'));
+		var baseurl = document.URL.substring(document.URL.indexOf('!')+9);
+		var xhr = new XMLHttpRequest();  
+alert(filter)      ;
+		xhr.open('GET', baseurl + 'api/vms/', true);
+		xhr.withCredentials = true;
+		xhr.setRequestHeader('Accept', 'application/json');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.setRequestHeader('Filter', 'false');
+		xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+		xhr.send(null);
+		xhr.onreadystatechange = function() { 
+			console.log("status: "+xhr.status);
+		        if (xhr.readyState == 4 && xhr.status == 200) {
+		               	alert(JSON.parse(xhr.responseText));
+		        }
+		};
+	
+	</script>
   </body>
   </html>
