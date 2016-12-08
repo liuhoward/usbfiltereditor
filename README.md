@@ -1,5 +1,5 @@
 # usbfiltereditor
 
- We propose to rewrite the usb filter editor using javascript so that it can be embedded into a web server. 
+ Usbfiltereditor is a UI plugin for oVirt https://github.com/oVirt 
 
  authors: Hao Liu, Tejaswi Susarla, Sai Koumudi, Manasa Devi, Naman Verma, Boyu Fan
